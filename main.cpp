@@ -25,13 +25,14 @@ class Vehicles{
 		int entry_time_min;
 		int exit_time;
 		char slotArray[5][8];
+		int i,j;
 		string username,password;
 		string newpw;
 		string un,pw;
 	public:
 		void setVehicledata();
 		void readVehicledata();
-		void reserveSlot();
+		//void reserveSlot();
 		void changepw();
 };
 
@@ -61,7 +62,7 @@ void displayMenu()
 				selection.readVehicledata();
 				displayMenu();
 			case 3:
-				selection.reserveSlot();
+				//selection.reserveSlot();
 				break;
 			/*case 4:
 				selectionTemp.changepw();
@@ -86,13 +87,6 @@ void displayMenu()
 		}
 }
 
-int main()
-{
-	Password obj;
-	obj.login_menu();
-	displayMenu();
-	return 0;
-}
 
 //login menu showing function
 void Password::login_menu()
@@ -214,7 +208,7 @@ void Vehicles::setVehicledata()
 	cout<<endl<<"\t\t\tEnter details: ";
 	cout<<endl<<"\t\t\t\tPlate number: ";
 	cin>>writingObject.plate_no;
-	cout<<endl<<"\t\t\t\tTime: ";
+	cout<<endl<<"\t\t\t\tTime ";
 	cout<<endl<<"\t\t\t\t\tHour: ";
 	cin>>writingObject.entry_time_hr;
 	cout<<endl<<"\t\t\t\t\tMinute: ";
@@ -227,7 +221,7 @@ void Vehicles::setVehicledata()
 	}
 	data_file.write((char*)&writingObject,sizeof(writingObject));
 	data_file.close();
-		arr[i-1][j-1]='X';
+		/*arr[i-1][j-1]='X';
 		system("cls");
 		cout<<endl<<"\t\t\t_______________________________________________";
 		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
@@ -245,7 +239,7 @@ void Vehicles::setVehicledata()
 		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
 		cout<<endl<<"\t\t\t  "<<arr[4][0]<<"  |  "<<arr[4][1]<<"  |  "<<arr[4][2]<<"  |  "<<arr[4][3]<<"  |  "<<arr[4][4]<<"  |  "<<arr[4][5]<<"  |  "<<arr[4][6]<<"  |  "<<arr[4][7]<<"  ";
 		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";
+		cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";*/
 		cout<<endl<<"\t\t\t\t\tThank You.";
 		cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
 		cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
@@ -337,3 +331,12 @@ void Vehicles::readVehicledata()
  		}
 		file2.close();
 }*/
+
+int main()
+{
+	Password obj;
+	obj.login_menu();
+	displayMenu();
+	return 0;
+}
+
