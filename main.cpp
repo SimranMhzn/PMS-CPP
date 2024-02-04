@@ -17,27 +17,34 @@ class Password{
 			void login_details();		
 };
 
+//vehicle data entry section
 class Vehicles{
 	protected:
 		int plate_no;
 		int entry_time_hr;
 		int entry_time_min;
 		int exit_time;
+		char slotArray[5][8];
 		string username,password;
 		string newpw;
 		string un,pw;
 	public:
 		void setVehicledata();
 		void readVehicledata();
+		void reserveSlot();
 		void changepw();
 };
 
-void displayMenu(Vehicles selectionTemp)
+//main function definition
+void displayMenu()
 {
+	//object of vehicle class 
+	Vehicles selection;
 	int option;
 	char ch;
 	flag:
-		system("cls");
+		system("cls"); //clears console
+		//main menu 
 		cout<<endl<<"\t\t\t\t1. Vehicle entry ";
 		cout<<endl<<"\t\t\t\t2. Vehicle exit ";
 		cout<<endl<<"\t\t\t\t3. Show reserved slots ";
@@ -48,12 +55,13 @@ void displayMenu(Vehicles selectionTemp)
 		switch(option)
 		{
 			case 1:
-				selectionTemp.setVehicledata();
-				break;
+				selection.setVehicledata();
+				displayMenu();
 			case 2:
-				selectionTemp.readVehicledata();
-				break;
+				selection.readVehicledata();
+				displayMenu();
 			case 3:
+				selection.reserveSlot();
 				break;
 			/*case 4:
 				selectionTemp.changepw();
@@ -82,8 +90,7 @@ int main()
 {
 	Password obj;
 	obj.login_menu();
-	Vehicles selection;
-	displayMenu(selection);
+	displayMenu();
 	return 0;
 }
 
@@ -172,7 +179,7 @@ void Vehicles::setVehicledata()
 	system("cls");
 	char ch;
 	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl<<endl;
-	char arr[5][8] ={{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'}};
+	/*char arr[5][8] ={{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'}};
 	int position,i,j;
 	cout<<endl<<"\t\t\t_______________________________________________";
 	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
@@ -189,7 +196,8 @@ void Vehicles::setVehicledata()
 	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
 	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
 	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
+	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";*/
+
 	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
 	flow:
 		cout<<endl<<"\t\t\tEnter row: ";
@@ -202,7 +210,7 @@ void Vehicles::setVehicledata()
 			cout<<endl<<"\t\t\tPlease enter row between 0-4 and column between 0-7.";
 			goto flow;
 		}
-		Vehicles writingObject;
+	Vehicles writingObject;
 	cout<<endl<<"\t\t\tEnter details: ";
 	cout<<endl<<"\t\t\t\tPlate number: ";
 	cin>>writingObject.plate_no;
@@ -212,14 +220,14 @@ void Vehicles::setVehicledata()
 	cout<<endl<<"\t\t\t\t\tMinute: ";
 	cin>>writingObject.entry_time_min;
 	fstream data_file;
-	data_file.open("data.txt",ios::app);
+	data_file.open("data.txt",ios::out);
 	if(!data_file)
 	{
 		cout<<endl<<"\t\t\tNo such file";
 	}
 	data_file.write((char*)&writingObject,sizeof(writingObject));
 	data_file.close();
-		arr[i][j]='X';
+		arr[i-1][j-1]='X';
 		system("cls");
 		cout<<endl<<"\t\t\t_______________________________________________";
 		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
@@ -251,23 +259,6 @@ void Vehicles::setVehicledata()
 		{
 			exit(0);
 		}
-	/*Vehicles writingObject;
-	cout<<endl<<"\t\t\tEnter details: ";
-	cout<<endl<<"\t\t\t\tPlate number: ";
-	cin>>writingObject.plate_no;
-	cout<<endl<<"\t\t\t\tTime: ";
-	cout<<endl<<"\t\t\t\tHour: ";
-	cin>>writingObject.entry_time_hr;
-	cout<<endl<<"\t\t\t\tMinute: ";
-	cin>>writingObject.entry_time_min;
-	fstream data_file;
-	data_file.open("data.txt",ios::out);
-	if(!data_file)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	data_file.write((char*)&writingObject,sizeof(writingObject));
-	data_file.close();*/
 }
 
 void Vehicles::readVehicledata()
