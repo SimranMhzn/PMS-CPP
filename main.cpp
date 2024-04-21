@@ -13,9 +13,195 @@ class Password{
 			string un,pw;
 			char ch;
 		public:
-			void login_menu();
-			void login_details();		
+			void loginMenu();
+			void resetPw();
+			void adminControl();
+			void loginDetails();		
 };
+
+
+//login menu showing function
+void Password::loginMenu()
+{
+	int choice;
+	flag:
+	system("cls");
+	cout<<endl<<"\t\t-------------------MENU-----------------"<<endl;
+	cout<<endl<<"\t\t\t\t1. Admin Control";
+	cout<<endl<<"\t\t\t\t2. Login";
+	cout<<endl<<endl<<"\t\t\tEnter your choice: ";
+	cin>>choice;
+	switch(choice)
+	{
+		case 1:
+			adminControl();
+			break;
+		case 2:
+			loginDetails();
+			break;
+		default:
+			goto flag;
+	}
+}
+
+//admin control operatons
+void Password::adminControl()
+{
+	system("cls");
+	int choice;
+	flag:
+	cout<<endl<<"\t\t-------------------MENU-----------------"<<endl;
+	cout<<endl<<"\t\t\t\t1. Reset password ";
+	cout<<endl<<"\t\t\t\t2. View Reserved Slots Details ";
+	cout<<endl<<endl<<"\t\t\tEnter your choice: ";
+	cin>>choice;
+	switch(choice)
+	{
+		case 1:
+			resetPw();
+			break;
+		case 2:
+			
+		default:
+			cout<<"\n\t\t\t\tInvalid Input!";
+			sleep(3);
+			goto flag;
+	}
+}
+
+void Password::resetPw()
+{
+	call:
+		system("cls");
+		char ch;
+		fstream file2,file3;
+		cin.ignore();
+		cout<<endl<<"\t\t\tVerification: ";
+		cout<<endl<<"\t\t\tEnter your username: ";
+		cin>>un;
+		cout<<endl<<"\t\t\tEnter your current password: ";
+		cin>>pw;
+		file2.open("logindata.txt",ios::in);
+		if(!file2)
+		{
+			cout<<endl<<"\t\t\tNo such file.";
+		}
+		while(file2>>username>>password)
+		{
+			if(password==pw)
+			{
+				cout<<endl<<"\t\t\tEnter new password: ";
+				cin>>newpw;
+				file3.open("logindata.txt",ios::out);
+				if(!file3)
+				{
+					cout<<endl<<"\t\t\tNo such file.";
+				}
+				file3<<username<<" "<<newpw;
+				cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
+				cout<<endl<<endl<<"\t\t\t\tPlease wait....";
+				sleep(3);
+				file3.close();
+				loginDetails();
+			}
+			else
+			{
+				int option;
+				cout<<endl<<"\t\t\tUsername or password does not match.";
+				cout<<endl<<"\t\t\tInvalid Username or Password! ";
+				fflush(stdin);
+				cout<<endl<<"\t\t\t1. Change with previous Password ";
+				cout<<endl<<"\t\t\t2. Change with security key ";
+				cin>>option;
+				switch(option)
+				{
+					case 1:
+						goto call;
+					case 2:
+						system("cls");
+						string codeRetrived, codeGiven;
+						fstream verify,temp,file;
+						verify.open("securityKey.txt",ios::in);
+						verify>>codeRetrived;
+						cout<<endl<<"\t\t\tEnter the security key: ";
+						cin>>codeGiven;
+						if(codeRetrived==codeGiven)
+						{
+							cout<<endl<<"\t\t\tEnter new password: ";
+							cin>>newpw;
+							file.open("logindata.txt",ios::out);
+							if(!file)
+							{
+								cout<<endl<<"\t\t\tNo such file.";
+							}
+							file<<username<<" "<<newpw;
+							cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
+							cout<<endl<<endl<<"\t\t\t\tPlease wait....";
+							sleep(1);
+							file.close();
+							verify.close();
+							temp.close();
+							loginDetails();
+						}
+						else
+						{
+							cout<<"\t\t\tInvalid Security Key!"<<endl;
+							goto call;
+						}
+				}
+			}
+ 		}
+		file2.close();
+}
+
+//login details taking function
+void Password::loginDetails()
+{
+	retry:
+	system("cls");
+	fstream loginFile;
+	cout<<endl<<"\t\t************WELCOME TO LOGIN PAGE************"<<endl;
+	fflush(stdin);
+	cout<<endl<<"\t\t\tEnter your username: ";
+	getline(cin,un);
+	cout<<endl<<"\t\t\tEnter your password: ";
+	getline(cin,pw);
+	loginFile.open("logindata.txt",ios::in);
+	if(!loginFile)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	
+	while(loginFile>>username>>password)
+	{
+		if(username==un && password==pw)
+		{
+			cout<<endl<<"\t\t\t\tLogging in......";
+			cout<<endl<<"\t\t\t\tLog in successful......";
+			sleep(1);
+			system("cls");
+		}
+		else
+		{
+			cout<<endl<<"\t\t\tInvalid Username or Password! ";
+			fflush(stdin);
+			cout<<endl<<"\t\t\tDo you want to try again (Y/N)? ";
+			cin>>ch;
+			tolower(ch);
+			if(ch=='y')
+			{
+				system("cls");
+				loginFile.close();
+				goto retry;
+			}
+			else 
+			{
+				loginMenu();
+			}
+		}
+	}
+	loginFile.close();
+}
 
 //vehicle data entry section
 class Vehicles{
@@ -33,7 +219,6 @@ class Vehicles{
 		void setVehicledata();
 		void readVehicledata();
 		//void reserveSlot();
-		void changepw();
 };
 
 //main function definition
@@ -49,8 +234,7 @@ void displayMenu()
 		cout<<endl<<"\t\t\t\t1. Vehicle entry ";
 		cout<<endl<<"\t\t\t\t2. Vehicle exit ";
 		cout<<endl<<"\t\t\t\t3. Show reserved slots ";
-		cout<<endl<<"\t\t\t\t4. Change password ";
-		cout<<endl<<"\t\t\t\t5. Exit";
+		cout<<endl<<"\t\t\t\t4. Exit";
 		cout<<endl<<"\n\n\t\t\t\t   Enter your choice:  ";
 		cin>>option;
 		switch(option)
@@ -64,10 +248,7 @@ void displayMenu()
 			case 3:
 				//selection.reserveSlot();
 				break;
-			/*case 4:
-				selectionTemp.changepw();
-				break;*/
-			case 5:
+			case 4:
 				exit(0);
 				break;
 			default:
@@ -85,86 +266,6 @@ void displayMenu()
 					exit(0);
 				}
 		}
-}
-
-
-//login menu showing function
-void Password::login_menu()
-{
-	int choice;
-	char ch;
-	flag:
-	system("cls");
-	cout<<endl<<"\t\t-------------------MENU-----------------"<<endl;
-	cout<<endl<<"\t\t\t\t1. Login";
-	cout<<endl<<"\t\t\t\t2. Exit";
-	cout<<endl<<endl<<"\t\t\tEnter your choice: ";
-	cin>>choice;
-	switch(choice)
-	{
-		case 1:
-			login_details();
-			break;
-		case 2:
-			exit(0);
-		default:
-			cout<<"\n\t\t\t\tInvalid Input!";
-			sleep(3);
-			goto flag;
-	}
-}
-
-//login details taking function
-void Password::login_details()
-{
-	retry:
-	system("cls");
-	fstream login_file;
-	cout<<endl<<"\t\t************WELCOME TO LOGIN PAGE************"<<endl;
-	fflush(stdin);
-	cout<<endl<<"\t\t\tEnter your username: ";
-	getline(cin,un);
-	cout<<endl<<"\t\t\tEnter your password: ";
-	getline(cin,pw);
-	login_file.open("logindata.txt",ios::in);
-	if(!login_file)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	
-	while(login_file>>username>>password)
-	{
-		if(username==un && password==pw)
-		{
-			cout<<endl<<"\t\t\t\tLogging in......";
-			sleep(3);
-			system("cls");
-		}
-		else
-		{
-			cout<<endl<<"\t\t\tInvalid Username or Password! ";
-			fflush(stdin);
-			cout<<endl<<"\t\t\tDo you want to try again (Y/N)? ";
-			cin>>ch;
-			tolower(ch);
-			if(ch=='y')
-			{
-				system("cls");
-				goto retry;
-				login_file.close();
-			}
-			else if(ch=='n')
-			{
-				login_menu();
-			}
-			else
-			{
-				cout<<endl<<"\t\t\t\tInvalid Input!";
-				exit(0);
-			}
-		}
-	}
-	login_file.close();
 }
 
 //getting the data 
@@ -278,64 +379,11 @@ void Vehicles::readVehicledata()
 	}
 	data_file.close();
 }
-/*void Vehicles::changepw()
-{
-	call:
-		system("cls");
-		char ch;
-		fstream file2,file3;
-		cin.ignore();
-		cout<<endl<<"\t\t\tEnter your username: ";
-		cin>>un;
-		cout<<endl<<"\t\t\tEnter your current password: ";
-		cin>>pw;
-		file2.open("logindata.txt",ios::in);
-		if(!file2)
-		{
-			cout<<endl<<"\t\t\tNo such file.";
-		}
-		while(file2>>username>>password)
-		{
-			if(password==pw)
-			{
-				cout<<endl<<"\t\t\tEnter new password: ";
-				cin>>newpw;
-				file3.open("logindata.txt",ios::out);
-				if(!file3)
-				{
-					cout<<endl<<"\t\t\tNo such file.";
-				}
-				file3<<un<<" "<<newpw;
-				cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
-				cout<<endl<<endl<<"\t\t\t\tPlease wait....";
-				sleep(3);
-				file3.close();
-				login_details();
-			}
-			else
-			{
-				cout<<endl<<"\t\t\tUsername or password does not match.";
-				cout<<endl<<endl<<"\t\t\tDo you want to try again?";
-				cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
-				cin>>ch;
-				tolower(ch);
-				if(ch=='y')
-				{
-					goto call;
-				}
-				else
-				{
-					exit(0);
-				}
-			}
- 		}
-		file2.close();
-}*/
 
 int main()
 {
 	Password obj;
-	obj.login_menu();
+	obj.loginMenu();
 	displayMenu();
 	return 0;
 }
