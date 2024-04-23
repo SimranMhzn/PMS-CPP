@@ -3,7 +3,10 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
+#include <sstream>
 using namespace std;
+
+void displayMenu();
 
 //password verification part
 class Password{
@@ -15,6 +18,7 @@ class Password{
 		public:
 			void loginMenu();
 			void resetPw();
+			void adminLogin();
 			void adminControl();
 			void loginDetails();		
 };
@@ -34,7 +38,7 @@ void Password::loginMenu()
 	switch(choice)
 	{
 		case 1:
-			adminControl();
+			adminLogin();
 			break;
 		case 2:
 			loginDetails();
@@ -45,6 +49,53 @@ void Password::loginMenu()
 }
 
 //admin control operatons
+
+void Password::adminLogin()
+{
+	ifstream adminfile;
+	string adminun,adminpw;
+	retry:
+	system("cls");
+	cout<<endl<<"\t\t************WELCOME TO ADMIN LOGIN PAGE************"<<endl;
+	fflush(stdin);
+	cout<<endl<<"\t\t\tEnter your username: ";
+	getline(cin,adminun);
+	cout<<endl<<"\t\t\tEnter your password: ";
+	getline(cin,adminpw);
+	adminfile.open("adminLogin.txt",ios::in);
+	if(!adminfile)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	
+	while(adminfile>>username>>password)
+	{
+		if(username==adminun && password==adminpw)
+		{
+			adminControl();
+		}
+		else
+		{
+			cout<<endl<<"\t\t\tInvalid Username or Password! ";
+			fflush(stdin);
+			cout<<endl<<"\t\t\tDo you want to try again (Y/N)? ";
+			cin>>ch;
+			tolower(ch);
+			if(ch=='y')
+			{
+				system("cls");
+				adminfile.close();
+				goto retry;
+			}
+			else 
+			{
+				loginMenu();
+			}
+		}
+	}
+	adminfile.close();
+}
+
 void Password::adminControl()
 {
 	system("cls");
@@ -100,7 +151,7 @@ void Password::resetPw()
 				file3<<username<<" "<<newpw;
 				cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
 				cout<<endl<<endl<<"\t\t\t\tPlease wait....";
-				sleep(3);
+				sleep(1);
 				file3.close();
 				loginDetails();
 			}
@@ -206,20 +257,98 @@ void Password::loginDetails()
 //vehicle data entry section
 class Vehicles{
 	protected:
-		int plate_no;
-		int entry_time_hr;
-		int entry_time_min;
-		int exit_time;
-		char slotArray[5][8];
-		int i,j;
-		string username,password;
-		string newpw;
-		string un,pw;
+		int plateNo;
+		string userName;
 	public:
 		void setVehicledata();
 		void readVehicledata();
-		//void reserveSlot();
+		void reserveSlot();
 };
+
+//getting the data 
+void Vehicles::setVehicledata()
+{
+	char ch;
+	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl<<endl;
+	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
+	flow:
+		int i,j;
+		cout<<endl<<"\t\t\tEnter row and column: ";
+		cin>>i>>j;
+		if(i>=5||j>=8)
+		{
+			cout<<endl<<"\t\t\tInvalid input.";
+			cout<<endl<<"\t\t\tPlease enter valid input.";
+			goto flow;
+		}
+	Vehicles writingObject;
+	cout<<endl<<"\t\t\tEnter details: ";
+	cout<<endl<<"\t\t\t\tPlate number: ";
+	cin>>writingObject.plateNo;
+	cout<<endl<<"\t\t\t\tName: ";
+	cin>>writingObject.userName;
+	fstream dataFile;
+	dataFile.open("data.txt",ios::app);
+	if(!dataFile)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	dataFile.write((char *) & writingObject, sizeof(writingObject));
+	cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";
+	cout<<endl<<"\t\t\t\t\tThank You.";
+	cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
+	cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
+	cin>>ch;
+	tolower(ch);
+	if(ch=='y')
+	{
+		dataFile.close();
+		goto flow;
+	}
+	dataFile.close();
+}
+
+void Vehicles::readVehicledata()
+{
+	Vehicles readingObject;
+	int detailsCheck;
+	fstream dataFile;
+	dataFile.open("data.txt",ios::in);
+	if(!dataFile)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
+	cin>>detailsCheck;
+	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)));
+	{
+		if(readingObject.plateNo==detailsCheck)
+		{
+			cout<<endl<<"\t\t\tPlate no: "<<readingObject.plateNo;
+			cout<<endl<<"\t\t\tUser name: "<<readingObject.userName;
+		}
+	}
+	dataFile.close();
+}
+
+/*void Vehicles::reserveSlot()
+{
+	ifstream slotReading;
+	slotreading.open("data.txt",ios::in);
+	Vehicles temp;
+	while(getline(slotReading,temp))
+	{
+		
+	}
+}*/
+
+int main()
+{
+	Password obj;
+	obj.loginMenu();
+	displayMenu();
+	return 0;
+}
 
 //main function definition
 void displayMenu()
@@ -267,124 +396,3 @@ void displayMenu()
 				}
 		}
 }
-
-//getting the data 
-void Vehicles::setVehicledata()
-{
-	system("cls");
-	char ch;
-	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl<<endl;
-	/*char arr[5][8] ={{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'},{'0','0','0','0','0','0','0','0'}};
-	int position,i,j;
-	cout<<endl<<"\t\t\t_______________________________________________";
-	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-	cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-	cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-	cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";*/
-
-	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
-	flow:
-		cout<<endl<<"\t\t\tEnter row: ";
-		cin>>i;
-		cout<<endl<<"\t\t\tEnter column: ";
-		cin>>j;
-		if(i>=5||j>=8)
-		{
-			cout<<endl<<"\t\t\tInvalid input.";
-			cout<<endl<<"\t\t\tPlease enter row between 0-4 and column between 0-7.";
-			goto flow;
-		}
-	Vehicles writingObject;
-	cout<<endl<<"\t\t\tEnter details: ";
-	cout<<endl<<"\t\t\t\tPlate number: ";
-	cin>>writingObject.plate_no;
-	cout<<endl<<"\t\t\t\tTime ";
-	cout<<endl<<"\t\t\t\t\tHour: ";
-	cin>>writingObject.entry_time_hr;
-	cout<<endl<<"\t\t\t\t\tMinute: ";
-	cin>>writingObject.entry_time_min;
-	fstream data_file;
-	data_file.open("data.txt",ios::out);
-	if(!data_file)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	data_file.write((char*)&writingObject,sizeof(writingObject));
-	data_file.close();
-		/*arr[i-1][j-1]='X';
-		system("cls");
-		cout<<endl<<"\t\t\t_______________________________________________";
-		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-		cout<<endl<<"\t\t\t  "<<arr[0][0]<<"  |  "<<arr[0][1]<<"  |  "<<arr[0][2]<<"  |  "<<arr[0][3]<<"  |  "<<arr[0][4]<<"  |  "<<arr[0][5]<<"  |  "<<arr[0][6]<<"  |  "<<arr[0][7]<<"  ";
-		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-		cout<<endl<<"\t\t\t  "<<arr[1][0]<<"  |  "<<arr[1][1]<<"  |  "<<arr[1][2]<<"  |  "<<arr[1][3]<<"  |  "<<arr[1][4]<<"  |  "<<arr[1][5]<<"  |  "<<arr[1][6]<<"  |  "<<arr[1][7]<<"  ";
-		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-		cout<<endl<<"\t\t\t  "<<arr[2][0]<<"  |  "<<arr[2][1]<<"  |  "<<arr[2][2]<<"  |  "<<arr[2][3]<<"  |  "<<arr[2][4]<<"  |  "<<arr[2][5]<<"  |  "<<arr[2][6]<<"  |  "<<arr[2][7]<<"  ";
-		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-		cout<<endl<<"\t\t\t  "<<arr[3][0]<<"  |  "<<arr[3][1]<<"  |  "<<arr[3][2]<<"  |  "<<arr[3][3]<<"  |  "<<arr[3][4]<<"  |  "<<arr[3][5]<<"  |  "<<arr[3][6]<<"  |  "<<arr[3][7]<<"  ";
-		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<"\t\t\t     |     |     |     |     |     |     |     ";
-		cout<<endl<<"\t\t\t  "<<arr[4][0]<<"  |  "<<arr[4][1]<<"  |  "<<arr[4][2]<<"  |  "<<arr[4][3]<<"  |  "<<arr[4][4]<<"  |  "<<arr[4][5]<<"  |  "<<arr[4][6]<<"  |  "<<arr[4][7]<<"  ";
-		cout<<endl<<"\t\t\t_____|_____|_____|_____|_____|_____|_____|_____";
-		cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";*/
-		cout<<endl<<"\t\t\t\t\tThank You.";
-		cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
-		cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
-		cin>>ch;
-		tolower(ch);
-		if(ch=='y')
-		{
-			goto flow;
-		}
-		else
-		{
-			exit(0);
-		}
-}
-
-void Vehicles::readVehicledata()
-{
-	Vehicles readingObject;
-	int detailsCheck;
-	fstream data_file;
-	data_file.open("data.txt",ios::in);
-	if(!data_file)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
-	cin>>detailsCheck;
-	while(data_file.read((char*)&readingObject,sizeof(readingObject)))
-	{
-		if(readingObject.plate_no==detailsCheck)
-		{
-			cout<<endl<<"\t\t\tTime parked";
-			cout<<endl<<"\t\t\tHour: "<<readingObject.entry_time_hr;
-			cout<<endl<<"\t\t\tMinute: "<<readingObject.entry_time_min;
-		}
-	}
-	data_file.close();
-}
-
-int main()
-{
-	Password obj;
-	obj.loginMenu();
-	displayMenu();
-	return 0;
-}
-
