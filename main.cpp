@@ -3,12 +3,12 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
-#include <sstream>
 using namespace std;
-
 void displayMenu();
+void reserveRead();
+void reserveWrite(int,int);
+int a[5][8];
 
-//password verification part
 class Password{
 		protected:
 			string username,password;
@@ -23,8 +23,25 @@ class Password{
 			void loginDetails();		
 };
 
+class Vehicles{
+	public:
+		int plateNo;
+		char userName[30];
+		int row;
+		int column;
+	public:
+		void setVehicledata();
+		void readVehicledata();
+};
 
-//login menu showing function
+int main()
+{
+	Password obj;
+	obj.loginMenu();
+	displayMenu();
+	return 0;
+}
+
 void Password::loginMenu()
 {
 	int choice;
@@ -47,8 +64,6 @@ void Password::loginMenu()
 			goto flag;
 	}
 }
-
-//admin control operatons
 
 void Password::adminLogin()
 {
@@ -112,10 +127,10 @@ void Password::adminControl()
 			resetPw();
 			break;
 		case 2:
-			
+			reserveRead();
 		default:
 			cout<<"\n\t\t\t\tInvalid Input!";
-			sleep(3);
+			sleep(1);
 			goto flag;
 	}
 }
@@ -205,7 +220,6 @@ void Password::resetPw()
 		file2.close();
 }
 
-//login details taking function
 void Password::loginDetails()
 {
 	retry:
@@ -254,39 +268,30 @@ void Password::loginDetails()
 	loginFile.close();
 }
 
-//vehicle data entry section
-class Vehicles{
-	protected:
-		int plateNo;
-		string userName;
-	public:
-		void setVehicledata();
-		void readVehicledata();
-		void reserveSlot();
-};
-
-//getting the data 
 void Vehicles::setVehicledata()
 {
 	char ch;
-	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl<<endl;
+	int row,column;
+	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl;
+	//reserveRead();
 	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
 	flow:
-		int i,j;
 		cout<<endl<<"\t\t\tEnter row and column: ";
-		cin>>i>>j;
-		if(i>=5||j>=8)
+		cin>>row>>column;
+		if(row>=5||column>=8)
 		{
 			cout<<endl<<"\t\t\tInvalid input.";
 			cout<<endl<<"\t\t\tPlease enter valid input.";
 			goto flow;
 		}
+		reserveWrite(row-1,column-1);
 	Vehicles writingObject;
 	cout<<endl<<"\t\t\tEnter details: ";
 	cout<<endl<<"\t\t\t\tPlate number: ";
 	cin>>writingObject.plateNo;
 	cout<<endl<<"\t\t\t\tName: ";
-	cin>>writingObject.userName;
+	cin.ignore();
+    cin.getline(writingObject.userName, 30);
 	fstream dataFile;
 	dataFile.open("data.txt",ios::app);
 	if(!dataFile)
@@ -326,31 +331,12 @@ void Vehicles::readVehicledata()
 		{
 			cout<<endl<<"\t\t\tPlate no: "<<readingObject.plateNo;
 			cout<<endl<<"\t\t\tUser name: "<<readingObject.userName;
+			sleep(1);
 		}
 	}
 	dataFile.close();
 }
 
-/*void Vehicles::reserveSlot()
-{
-	ifstream slotReading;
-	slotreading.open("data.txt",ios::in);
-	Vehicles temp;
-	while(getline(slotReading,temp))
-	{
-		
-	}
-}*/
-
-int main()
-{
-	Password obj;
-	obj.loginMenu();
-	displayMenu();
-	return 0;
-}
-
-//main function definition
 void displayMenu()
 {
 	//object of vehicle class 
@@ -395,4 +381,42 @@ void displayMenu()
 					exit(0);
 				}
 		}
+}
+
+void reserveRead()
+{
+	ifstream reservedFile;
+	int num[5][8];
+	reservedFile.open("reserved.txt",ios::in);
+	while (!reservedFile.eof()) {
+    	for (int x = 0; x < 5; x++) {
+      	    for (int y = 0; y < 8; y++) {
+            	if (!(reservedFile >> num[x][y])) {
+                	// Handle if reading fails (e.g., end of file reached prematurely)
+                	break;
+            	}
+            cout << "\t" << num[x][y] << "\t\t";
+        	}
+        cout << endl;
+   		}	
+	}
+}
+
+void reserveWrite(int num1,int num2)
+{
+	fstream reservedFile;
+	reservedFile.open("reserved.txt",ios::out);
+	for(int k=0;k<5;k++)
+	{
+		for(int l=0;l<8;l++)
+		{
+			if(k==num1&&l==num2)
+			{
+				a[k][l]==1;
+			}
+			reservedFile<<a[k][l]<<" ";
+		}
+		reservedFile<<endl;
+	}
+	reservedFile.close();
 }
