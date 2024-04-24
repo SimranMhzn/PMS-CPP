@@ -27,11 +27,12 @@ class Vehicles{
 	public:
 		int plateNo;
 		char userName[30];
-		int row;
-		int column;
+		int hr,min;
+		int row,column;
 	public:
 		void setVehicledata();
 		void readVehicledata();
+		void calculateTime(int,int);
 };
 
 int main()
@@ -285,20 +286,41 @@ void Vehicles::setVehicledata()
 			goto flow;
 		}
 		reserveWrite(row-1,column-1);
-	Vehicles writingObject;
-	cout<<endl<<"\t\t\tEnter details: ";
-	cout<<endl<<"\t\t\t\tPlate number: ";
-	cin>>writingObject.plateNo;
-	cout<<endl<<"\t\t\t\tName: ";
-	cin.ignore();
-    cin.getline(writingObject.userName, 30);
+	Vehicles writingObject,readingObject;
 	fstream dataFile;
-	dataFile.open("data.txt",ios::app);
+	dataFile.open("data.txt",ios::in);
 	if(!dataFile)
 	{
 		cout<<endl<<"\t\t\tNo such file";
 	}
-	dataFile.write((char *) & writingObject, sizeof(writingObject));
+	cout<<endl<<"\t\t\tEnter details: ";
+	again:
+	cout<<endl<<"\t\t\t\tPlate number: ";
+	cin>>writingObject.plateNo;
+	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)));
+	{
+		if(readingObject.plateNo==writingObject.plateNo)
+		{
+			cout<<endl<<"\t\t\tThe vehicle with same plate no already exist. Please enter carefully!";
+			goto again;
+		}
+	}
+	dataFile.close();
+	cout<<endl<<"\t\t\t\tName: ";
+	cin.ignore();
+    cin.getline(writingObject.userName, 30);
+    cout<<endl<<"\t\t\t\tPresent time: ";
+    cout<<endl<<"\t\t\t\tHour: ";
+	cin>>writingObject.hr;
+	cout<<endl<<"\t\t\t\tMinute: ";
+	cin>>writingObject.min;
+	fstream data;
+	data.open("data.txt",ios::app);
+	if(!data)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	data.write((char *) & writingObject, sizeof(writingObject));
 	cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";
 	cout<<endl<<"\t\t\t\t\tThank You.";
 	cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
@@ -310,12 +332,13 @@ void Vehicles::setVehicledata()
 		dataFile.close();
 		goto flow;
 	}
-	dataFile.close();
+	data.close();
 }
 
 void Vehicles::readVehicledata()
 {
 	Vehicles readingObject;
+	char ch=0;
 	int detailsCheck;
 	fstream dataFile;
 	dataFile.open("data.txt",ios::in);
@@ -329,12 +352,40 @@ void Vehicles::readVehicledata()
 	{
 		if(readingObject.plateNo==detailsCheck)
 		{
+			calculateTime(readingObject.hr,readingObject.min);
 			cout<<endl<<"\t\t\tPlate no: "<<readingObject.plateNo;
 			cout<<endl<<"\t\t\tUser name: "<<readingObject.userName;
-			sleep(1);
+			cout<<endl<<endl<<"\t\t\tHappy Parking!";
+			cout<<endl<<"\t\tPlease enter any key to exit the page!";
+			cin>>ch;
+			if(ch!=0)
+			{
+				exit(0);
+			}
 		}
 	}
 	dataFile.close();
+}
+
+void Vehicles::calculateTime(int x,int y)
+{
+	int h,m;
+	cout<<endl<<"\t\t\tEnter the present time: ";
+	cout<<endl<<"\t\t\tHours: ";
+	cin>>h;
+	cout<<endl<<"\t\t\tMinutes: ";
+	cin>>m;
+	int totalMin1=(x*60)+y;
+	int totalMin2=(h*60)+m;
+	int diff=totalMin2-totalMin1;
+	int hour=diff/60;
+	int min=diff%60;
+	float price=hour*50+min*0.8;
+	cout<<endl<<endl<<"\t\t\tTotal price: "<<price;
+	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
+	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
+	cout<<endl<<"\t\t\tTotal minutes parked: "<<min;
+	cout<<endl<<endl<<"\t\t\tNote: Price per hour= Rs 50";
 }
 
 void displayMenu()
