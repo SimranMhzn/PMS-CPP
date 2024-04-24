@@ -361,7 +361,7 @@ void displayMenu()
 				selection.readVehicledata();
 				displayMenu();
 			case 3:
-				//selection.reserveSlot();
+			//	selection.reserveSlot();
 				break;
 			case 4:
 				exit(0);
@@ -402,7 +402,7 @@ void reserveRead()
 	}
 }
 
-/*void reserveWrite(int num1,int num2)
+void reserveWrite(int num1,int num2)
 {
 	fstream reservedFile;
 	reservedFile.open("reserved.txt",ios::out);
@@ -412,11 +412,11 @@ void reserveRead()
 		{
 			if(k==num1&&l==num2)
 			{
-				a[k][l]==1;
+				a[k][l]=1;
 			}
 			reservedFile<<a[k][l]<<" ";
 		}
 		reservedFile<<endl;
 	}
 	reservedFile.close();
-}*/
+}
