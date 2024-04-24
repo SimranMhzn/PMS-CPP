@@ -402,7 +402,7 @@ void reserveRead()
 	}
 }
 
-void reserveWrite(int num1,int num2)
+/*void reserveWrite(int num1,int num2)
 {
 	fstream reservedFile;
 	reservedFile.open("reserved.txt",ios::out);
@@ -419,4 +419,4 @@ void reserveWrite(int num1,int num2)
 		reservedFile<<endl;
 	}
 	reservedFile.close();
-}
+}*/
