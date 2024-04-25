@@ -116,6 +116,7 @@ void Password::adminControl()
 {
 	system("cls");
 	int choice;
+	char key;
 	flag:
 	cout<<endl<<"\t\t-------------------MENU-----------------"<<endl;
 	cout<<endl<<"\t\t\t\t1. Reset password ";
@@ -129,11 +130,19 @@ void Password::adminControl()
 			break;
 		case 2:
 			reserveRead();
+			cout<<"\t\t\tEnter any key to exit: ";
+			cin>>key;
+			if(key!=0)
+			{
+				break;
+			}
 		default:
 			cout<<"\n\t\t\t\tInvalid Input!";
 			sleep(1);
 			goto flag;
 	}
+	system("cls");
+	adminControl();
 }
 
 void Password::resetPw()
@@ -179,6 +188,7 @@ void Password::resetPw()
 				fflush(stdin);
 				cout<<endl<<"\t\t\t1. Change with previous Password ";
 				cout<<endl<<"\t\t\t2. Change with security key ";
+				cout<<endl<<endl<<"\t\t\tPlease enter your choice: ";
 				cin>>option;
 				switch(option)
 				{
@@ -208,7 +218,7 @@ void Password::resetPw()
 							file.close();
 							verify.close();
 							temp.close();
-							loginDetails();
+							loginMenu();
 						}
 						else
 						{
@@ -274,7 +284,7 @@ void Vehicles::setVehicledata()
 	char ch;
 	int row,column;
 	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl;
-	//reserveRead();
+	reserveRead();
 	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
 	flow:
 		cout<<endl<<"\t\t\tEnter row and column: ";
@@ -395,11 +405,11 @@ void displayMenu()
 	int option;
 	char ch;
 	flag:
-		system("cls"); //clears console
-		//main menu 
+		system("cls"); 
 		cout<<endl<<"\t\t\t\t1. Vehicle entry ";
-		cout<<endl<<"\t\t\t\t2. Vehicle exit ";
+		cout<<endl<<"\t\t\t\t2. Bill generation ";
 		cout<<endl<<"\t\t\t\t3. Show reserved slots ";
+		//cout<<endl<<"\t\t\t\t4. Modify records ";
 		cout<<endl<<"\t\t\t\t4. Exit";
 		cout<<endl<<"\n\n\t\t\t\t   Enter your choice:  ";
 		cin>>option;
@@ -412,7 +422,7 @@ void displayMenu()
 				selection.readVehicledata();
 				displayMenu();
 			case 3:
-			//	selection.reserveSlot();
+				selection.reserveRead();
 				break;
 			case 4:
 				exit(0);
@@ -436,17 +446,17 @@ void displayMenu()
 
 void reserveRead()
 {
-	ifstream reservedFile;
+	fstream reservedFile;
+	char ch=0;
 	int num[5][8];
 	reservedFile.open("reserved.txt",ios::in);
 	while (!reservedFile.eof()) {
     	for (int x = 0; x < 5; x++) {
       	    for (int y = 0; y < 8; y++) {
             	if (!(reservedFile >> num[x][y])) {
-                	// Handle if reading fails (e.g., end of file reached prematurely)
                 	break;
             	}
-            cout << "\t" << num[x][y] << "\t\t";
+            	cout<<"\t\t"<< num[x][y];
         	}
         cout << endl;
    		}	
