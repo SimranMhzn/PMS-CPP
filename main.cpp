@@ -422,7 +422,7 @@ void displayMenu()
 				selection.readVehicledata();
 				displayMenu();
 			case 3:
-				selection.reserveRead();
+				reserveRead();
 				break;
 			case 4:
 				exit(0);
@@ -447,7 +447,6 @@ void displayMenu()
 void reserveRead()
 {
 	fstream reservedFile;
-	char ch=0;
 	int num[5][8];
 	reservedFile.open("reserved.txt",ios::in);
 	while (!reservedFile.eof()) {
@@ -466,7 +465,20 @@ void reserveRead()
 void reserveWrite(int num1,int num2)
 {
 	fstream reservedFile;
-	reservedFile.open("reserved.txt",ios::out);
+	/*fstream read;
+	read.open("reserved.txt",ios::in);
+	int num[5][8];
+	while (!read.eof()) {
+    	for (int x = 0; x < 5; x++) {
+      	    for (int y = 0; y < 8; y++) {
+            	if (!(reservedFile >> num[x][y])) {
+                	break;
+            	}
+        	}
+   		}	
+	}*/
+	reservedFile.open("reserved.txt",ios::app);
+	reservedFile.seekg(0, ios::beg);
 	for(int k=0;k<5;k++)
 	{
 		for(int l=0;l<8;l++)
@@ -479,5 +491,6 @@ void reserveWrite(int num1,int num2)
 		}
 		reservedFile<<endl;
 	}
+	//read.close();
 	reservedFile.close();
 }
