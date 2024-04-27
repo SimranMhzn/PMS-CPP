@@ -25,7 +25,7 @@ class Password{
 
 class Vehicles{
 	public:
-		int plateNo;
+		string plateNo;
 		char userName[30];
 		int hr,min;
 		int row,column;
@@ -33,6 +33,7 @@ class Vehicles{
 		void setVehicledata();
 		void readVehicledata();
 		void calculateTime(int,int);
+		void removeData(string);
 };
 
 int main()
@@ -157,7 +158,7 @@ void Password::resetPw()
 		cin>>un;
 		cout<<endl<<"\t\t\tEnter your current password: ";
 		cin>>pw;
-		file2.open("logindata.txt",ios::in);
+		file2.open("adminLogin.txt",ios::in);
 		if(!file2)
 		{
 			cout<<endl<<"\t\t\tNo such file.";
@@ -168,7 +169,7 @@ void Password::resetPw()
 			{
 				cout<<endl<<"\t\t\tEnter new password: ";
 				cin>>newpw;
-				file3.open("logindata.txt",ios::out);
+				file3.open("adminLogin.txt",ios::out);
 				if(!file3)
 				{
 					cout<<endl<<"\t\t\tNo such file.";
@@ -178,7 +179,7 @@ void Password::resetPw()
 				cout<<endl<<endl<<"\t\t\t\tPlease wait....";
 				sleep(1);
 				file3.close();
-				loginDetails();
+				adminLogin();
 			}
 			else
 			{
@@ -186,7 +187,7 @@ void Password::resetPw()
 				cout<<endl<<"\t\t\tUsername or password does not match.";
 				cout<<endl<<"\t\t\tInvalid Username or Password! ";
 				fflush(stdin);
-				cout<<endl<<"\t\t\t1. Change with previous Password ";
+				cout<<endl<<"\t\t\t1. Try again ";
 				cout<<endl<<"\t\t\t2. Change with security key ";
 				cout<<endl<<endl<<"\t\t\tPlease enter your choice: ";
 				cin>>option;
@@ -206,7 +207,7 @@ void Password::resetPw()
 						{
 							cout<<endl<<"\t\t\tEnter new password: ";
 							cin>>newpw;
-							file.open("logindata.txt",ios::out);
+							file.open("adminLogin.txt",ios::out);
 							if(!file)
 							{
 								cout<<endl<<"\t\t\tNo such file.";
@@ -218,7 +219,7 @@ void Password::resetPw()
 							file.close();
 							verify.close();
 							temp.close();
-							loginMenu();
+							adminLogin();
 						}
 						else
 						{
@@ -289,24 +290,45 @@ void Vehicles::setVehicledata()
 	flow:
 		cout<<endl<<"\t\t\tEnter row and column: ";
 		cin>>row>>column;
-		if(row>=5||column>=8)
+		if(row>5||column>8)
 		{
 			cout<<endl<<"\t\t\tInvalid input.";
 			cout<<endl<<"\t\t\tPlease enter valid input.";
 			goto flow;
 		}
+		fstream read;
+		int num[5][8];
+		read.open("reserved.txt",ios::in);
+		while (!read.eof()) {
+    		for (int x = 0; x < 5; x++) {
+      	    	for (int y = 0; y < 8; y++) {
+            		if (!(read >> num[x][y])) {
+                		break;
+            		}
+            		if(num[x][y]==1)
+            		{
+            			if(row==x&&column==y)
+            			{
+            				cout<<endl<<"\t\t\t The selected slot is already reserved. Please try again!";
+            				goto flow;
+						}
+					}
+        		}
+   			}	
+		}
+		read.close();
 		reserveWrite(row-1,column-1);
 	Vehicles writingObject,readingObject;
+	cout<<endl<<"\t\t\tEnter details: ";
+	again:
+	cout<<endl<<"\t\t\t\tPlate number: ";
+	cin>>writingObject.plateNo;
 	fstream dataFile;
 	dataFile.open("data.txt",ios::in);
 	if(!dataFile)
 	{
 		cout<<endl<<"\t\t\tNo such file";
 	}
-	cout<<endl<<"\t\t\tEnter details: ";
-	again:
-	cout<<endl<<"\t\t\t\tPlate number: ";
-	cin>>writingObject.plateNo;
 	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)));
 	{
 		if(readingObject.plateNo==writingObject.plateNo)
@@ -349,16 +371,17 @@ void Vehicles::readVehicledata()
 {
 	Vehicles readingObject;
 	char ch=0;
-	int detailsCheck;
+	string detailsCheck;
+	re:
+	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
+	cin>>detailsCheck;
 	fstream dataFile;
 	dataFile.open("data.txt",ios::in);
 	if(!dataFile)
 	{
 		cout<<endl<<"\t\t\tNo such file";
 	}
-	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
-	cin>>detailsCheck;
-	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)));
+	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)))
 	{
 		if(readingObject.plateNo==detailsCheck)
 		{
@@ -373,7 +396,14 @@ void Vehicles::readVehicledata()
 				exit(0);
 			}
 		}
+		else
+		{
+			cout<<endl<<"\t\t\t Error finding the details! Please enter valid number plate! ";
+			dataFile.close();
+			goto re;
+		}
 	}
+	readingObject.removeData(detailsCheck);
 	dataFile.close();
 }
 
@@ -391,11 +421,43 @@ void Vehicles::calculateTime(int x,int y)
 	int hour=diff/60;
 	int min=diff%60;
 	float price=hour*50+min*0.8;
-	cout<<endl<<endl<<"\t\t\tTotal price: "<<price;
-	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
+	cout<<endl<<endl<<"\t\t\tTotal price: "<<abs(price);
 	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
 	cout<<endl<<"\t\t\tTotal minutes parked: "<<min;
 	cout<<endl<<endl<<"\t\t\tNote: Price per hour= Rs 50";
+}
+
+void Vehicles::removeData(string option) {
+    const int ROWS = 5;
+    const int COLS = 8;
+    Vehicles temp;
+    int x,y;
+    int num[ROWS][COLS] = {};
+    ofstream writing;
+	writing.open("reserved.txt",ios::out);
+    ifstream reading;
+	reading.open("data.txt", ios::in);
+    if (!reading.is_open()) {
+        cout << "Error: Failed to open file 'reserved.txt' for reading." << endl;
+        exit(1);
+    }
+    else {
+        while(reading.read(reinterpret_cast<char*>(&temp), sizeof(temp)))
+		{
+			if(temp.plateNo!=option)
+			{
+    			writing.write(reinterpret_cast<char*>(&temp), sizeof(temp));
+			}
+		}
+		writing.close();
+    	reading.close();
+    	if (remove("data.txt") != 0) {
+        	cout << endl << "\t\t\tError: Failed to remove file 'data.txt'." << endl;
+    	}
+    	if (rename("tempo.txt", "data.txt") != 0) {
+        	cout << endl << "\t\t\tError: Failed to rename file 'tempo.txt' to 'data.txt'." << endl;
+    	}
+    }
 }
 
 void displayMenu()
@@ -403,13 +465,12 @@ void displayMenu()
 	//object of vehicle class 
 	Vehicles selection;
 	int option;
-	char ch;
+	char ch=0;
 	flag:
 		system("cls"); 
 		cout<<endl<<"\t\t\t\t1. Vehicle entry ";
 		cout<<endl<<"\t\t\t\t2. Bill generation ";
 		cout<<endl<<"\t\t\t\t3. Show reserved slots ";
-		//cout<<endl<<"\t\t\t\t4. Modify records ";
 		cout<<endl<<"\t\t\t\t4. Exit";
 		cout<<endl<<"\n\n\t\t\t\t   Enter your choice:  ";
 		cin>>option;
@@ -422,7 +483,14 @@ void displayMenu()
 				selection.readVehicledata();
 				displayMenu();
 			case 3:
+				cout<<endl<<"\t\t\t\t\t\t\t\tDetails:"<<endl<<endl;
 				reserveRead();
+				cout<<endl<<"\t\t\tEnter any key to exit: ";
+				cin>>ch;
+				if(ch!=0)
+				{
+					displayMenu();
+				}
 				break;
 			case 4:
 				exit(0);
@@ -462,35 +530,48 @@ void reserveRead()
 	}
 }
 
-void reserveWrite(int num1,int num2)
-{
-	fstream reservedFile;
-	/*fstream read;
-	read.open("reserved.txt",ios::in);
-	int num[5][8];
-	while (!read.eof()) {
-    	for (int x = 0; x < 5; x++) {
-      	    for (int y = 0; y < 8; y++) {
-            	if (!(reservedFile >> num[x][y])) {
-                	break;
-            	}
-        	}
-   		}	
-	}*/
-	reservedFile.open("reserved.txt",ios::app);
-	reservedFile.seekg(0, ios::beg);
-	for(int k=0;k<5;k++)
-	{
-		for(int l=0;l<8;l++)
-		{
-			if(k==num1&&l==num2)
-			{
-				a[k][l]=1;
-			}
-			reservedFile<<a[k][l]<<" ";
-		}
-		reservedFile<<endl;
-	}
-	//read.close();
-	reservedFile.close();
+void reserveWrite(int num1, int num2) {
+    const int ROWS = 5;
+    const int COLS = 8;
+    int num[ROWS][COLS] = {};
+
+    ifstream read("reserved.txt", ios::in);
+    if (!read.is_open()) {
+        cout << "Error: Failed to open file 'reserved.txt' for reading." << endl;
+        exit(1);
+    }
+    else {
+        for (int x = 0; x < ROWS; x++) {
+            for (int y = 0; y < COLS; y++) {
+                if (!(read >> num[x][y])) {
+                    break;
+                }
+            }
+        }
+    }
+    read.close();
+
+    if (num1 >= 0 && num1 < ROWS && num2 >= 0 && num2 < COLS) {
+        num[num1][num2] = 1;
+    }
+    else {
+        cout << endl << "\t\t\tError: Invalid array indices provided." << endl;
+        return;
+    }
+
+    ofstream reservedFile("reserved.txt");
+    if (!reservedFile.is_open()) {
+        cout << endl << "\t\t\tError: Failed to open file 'reserved.txt' for writing." << endl;
+        return;
+    }
+
+    for (int k = 0; k < ROWS; k++) {
+        for (int l = 0; l < COLS; l++) {
+            reservedFile << num[k][l] << " ";
+        }
+        reservedFile << endl;
+    }
+
+    reservedFile.close();
+    cout << endl << "\t\t\tData written to file successfully." << endl;
 }
