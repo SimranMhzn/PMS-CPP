@@ -298,7 +298,7 @@ void Vehicles::setVehicledata()
 		}
 		fstream read;
 		int num[5][8];
-		read.open("reserved.txt",ios::in);
+		read.open("reserved.txt",ios::in| ios::binary);
 		while (!read.eof()) {
     		for (int x = 0; x < 5; x++) {
       	    	for (int y = 0; y < 8; y++) {
@@ -324,7 +324,7 @@ void Vehicles::setVehicledata()
 	cout<<endl<<"\t\t\t\tPlate number: ";
 	cin>>writingObject.plateNo;
 	fstream dataFile;
-	dataFile.open("data.txt",ios::in);
+	dataFile.open("data.txt",ios::in|ios::binary);
 	if(!dataFile)
 	{
 		cout<<endl<<"\t\t\tNo such file";
@@ -347,7 +347,7 @@ void Vehicles::setVehicledata()
 	cout<<endl<<"\t\t\t\tMinute: ";
 	cin>>writingObject.min;
 	fstream data;
-	data.open("data.txt",ios::app);
+	data.open("data.txt",ios::app|ios::binary);
 	if(!data)
 	{
 		cout<<endl<<"\t\t\tNo such file";
@@ -376,7 +376,7 @@ void Vehicles::readVehicledata()
 	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
 	cin>>detailsCheck;
 	fstream dataFile;
-	dataFile.open("data.txt",ios::in);
+	dataFile.open("data.txt",ios::in|ios::binary);
 	if(!dataFile)
 	{
 		cout<<endl<<"\t\t\tNo such file";
@@ -395,6 +395,7 @@ void Vehicles::readVehicledata()
 			{
 				exit(0);
 			}
+			readingObject.removeData(detailsCheck);
 		}
 		else
 		{
@@ -403,7 +404,6 @@ void Vehicles::readVehicledata()
 			goto re;
 		}
 	}
-	readingObject.removeData(detailsCheck);
 	dataFile.close();
 }
 
@@ -428,37 +428,34 @@ void Vehicles::calculateTime(int x,int y)
 }
 
 void Vehicles::removeData(string option) {
-    const int ROWS = 5;
-    const int COLS = 8;
     Vehicles temp;
-    int x,y;
-    int num[ROWS][COLS] = {};
+    int check = 0;
     ofstream writing;
-	writing.open("reserved.txt",ios::out);
     ifstream reading;
-	reading.open("data.txt", ios::in);
-    if (!reading.is_open()) {
-        cout << "Error: Failed to open file 'reserved.txt' for reading." << endl;
-        exit(1);
+    writing.open("delete.txt", ios::out | ios::binary);
+    reading.open("data.txt", ios::in | ios::binary);
+    if (!writing.is_open() || !reading.is_open()) {
+        cout << "Error: Unable to open files." << endl;
+        return;
     }
-    else {
-        while(reading.read(reinterpret_cast<char*>(&temp), sizeof(temp)))
-		{
-			if(temp.plateNo!=option)
-			{
-    			writing.write(reinterpret_cast<char*>(&temp), sizeof(temp));
-			}
-		}
-		writing.close();
-    	reading.close();
-    	if (remove("data.txt") != 0) {
-        	cout << endl << "\t\t\tError: Failed to remove file 'data.txt'." << endl;
-    	}
-    	if (rename("tempo.txt", "data.txt") != 0) {
-        	cout << endl << "\t\t\tError: Failed to rename file 'tempo.txt' to 'data.txt'." << endl;
-    	}
+    while (reading.read(reinterpret_cast<char*>(&temp), sizeof(temp))) {
+        if (temp.plateNo == option) {
+            check = 1; 
+        } else {
+            writing.write(reinterpret_cast<char*>(&temp), sizeof(temp));
+        }
+    }
+    writing.close();
+    reading.close();
+    remove("data.txt");
+    rename("delete.txt", "data.txt");
+    if (check == 1) {
+        cout << "\n\t\t\tRecord Deleted Successfully.";
+    } else {
+        cout << "\n\t\t\tRecord not found!!";
     }
 }
+
 
 void displayMenu()
 {
