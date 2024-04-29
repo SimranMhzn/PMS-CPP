@@ -3,11 +3,12 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
+int num[5][8];
+
 using namespace std;
 void displayMenu();
 void reserveRead();
 void reserveWrite(int,int);
-int a[5][8];
 
 class Password{
 		protected:
@@ -16,24 +17,29 @@ class Password{
 			string un,pw;
 			char ch;
 		public:
-			void loginMenu();
 			void resetPw();
+			int resetOption();
 			void adminLogin();
 			void adminControl();
-			void loginDetails();		
+			void loginDetails();
+			void loginMenu();	
 };
 
 class Vehicles{
 	public:
-		string plateNo;
-		char userName[30];
+		int plateNo;
+		string userName;
 		int hr,min;
 		int row,column;
 	public:
+		int checkPlateno(int);
+		int writeData(Vehicles);
 		void setVehicledata();
-		void readVehicledata();
+		int checkReserved(int,int);
+		void generateData();
 		void calculateTime(int,int);
-		void removeData(string);
+		void removeData(int);
+		void removeSlot(int);
 };
 
 int main()
@@ -44,7 +50,7 @@ int main()
 	return 0;
 }
 
-void Password::loginMenu()
+void Password::loginMenu()//main menu
 {
 	int choice;
 	flag:
@@ -151,7 +157,8 @@ void Password::resetPw()
 	call:
 		system("cls");
 		char ch;
-		fstream file2,file3;
+		ifstream file2;
+		ofstream file3;
 		cin.ignore();
 		cout<<endl<<"\t\t\tVerification: ";
 		cout<<endl<<"\t\t\tEnter your username: ";
@@ -183,60 +190,72 @@ void Password::resetPw()
 			}
 			else
 			{
-				int option;
 				cout<<endl<<"\t\t\tUsername or password does not match.";
 				cout<<endl<<"\t\t\tInvalid Username or Password! ";
-				fflush(stdin);
-				cout<<endl<<"\t\t\t1. Try again ";
-				cout<<endl<<"\t\t\t2. Change with security key ";
-				cout<<endl<<endl<<"\t\t\tPlease enter your choice: ";
-				cin>>option;
-				switch(option)
+				int result=resetOption();
+				if(result==1)
 				{
-					case 1:
-						goto call;
-					case 2:
-						system("cls");
-						string codeRetrived, codeGiven;
-						fstream verify,temp,file;
-						verify.open("securityKey.txt",ios::in);
-						verify>>codeRetrived;
-						cout<<endl<<"\t\t\tEnter the security key: ";
-						cin>>codeGiven;
-						if(codeRetrived==codeGiven)
-						{
-							cout<<endl<<"\t\t\tEnter new password: ";
-							cin>>newpw;
-							file.open("adminLogin.txt",ios::out);
-							if(!file)
-							{
-								cout<<endl<<"\t\t\tNo such file.";
-							}
-							file<<username<<" "<<newpw;
-							cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
-							cout<<endl<<endl<<"\t\t\t\tPlease wait....";
-							sleep(1);
-							file.close();
-							verify.close();
-							temp.close();
-							adminLogin();
-						}
-						else
-						{
-							cout<<"\t\t\tInvalid Security Key!"<<endl;
-							goto call;
-						}
+					goto call;
 				}
 			}
  		}
 		file2.close();
 }
 
+int Password::resetOption()
+{
+	int option;
+	int flag=0;
+	fflush(stdin);
+	cout<<endl<<"\t\t\t1. Try again ";
+	cout<<endl<<"\t\t\t2. Change with security key ";
+	cout<<endl<<endl<<"\t\t\tPlease enter your choice: ";
+	cin>>option;
+	switch(option)
+	{
+		case 1:
+			flag=1;
+			return flag;
+		case 2:
+			system("cls");
+			string codeRetrived, codeGiven;
+			ifstream verify;
+			ofstream file;
+			verify.open("securityKey.txt",ios::in);
+			verify>>codeRetrived;
+			cout<<endl<<"\t\t\tEnter the security key: ";
+			cin>>codeGiven;
+			if(codeRetrived==codeGiven)
+			{
+				cout<<endl<<"\t\t\tEnter new password: ";
+				cin>>newpw;
+				file.open("adminLogin.txt",ios::out);
+				if(!file)
+				{
+					cout<<endl<<"\t\t\tNo such file.";
+				}
+				file<<username<<" "<<newpw;
+				cout<<endl<<"\t\t\tPassword changed successfully."<<endl;
+				cout<<endl<<endl<<"\t\t\t\tPlease wait....";
+				sleep(1);
+				file.close();
+				verify.close();
+				adminLogin();
+			}
+			else
+			{
+				cout<<"\t\t\tInvalid Security Key!"<<endl;
+				flag==1;
+				return flag;
+			}
+	}
+}
+
 void Password::loginDetails()
 {
 	retry:
 	system("cls");
-	fstream loginFile;
+	ifstream loginFile;
 	cout<<endl<<"\t\t************WELCOME TO LOGIN PAGE************"<<endl;
 	fflush(stdin);
 	cout<<endl<<"\t\t\tEnter your username: ";
@@ -280,186 +299,8 @@ void Password::loginDetails()
 	loginFile.close();
 }
 
-void Vehicles::setVehicledata()
+void displayMenu()//display menu after login
 {
-	char ch;
-	int row,column;
-	cout<<endl<<"\t\t\t\t**********PARKING SLOTS**********"<<endl;
-	reserveRead();
-	cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
-	flow:
-		cout<<endl<<"\t\t\tEnter row and column: ";
-		cin>>row>>column;
-		if(row>5||column>8)
-		{
-			cout<<endl<<"\t\t\tInvalid input.";
-			cout<<endl<<"\t\t\tPlease enter valid input.";
-			goto flow;
-		}
-		fstream read;
-		int num[5][8];
-		read.open("reserved.txt",ios::in| ios::binary);
-		while (!read.eof()) {
-    		for (int x = 0; x < 5; x++) {
-      	    	for (int y = 0; y < 8; y++) {
-            		if (!(read >> num[x][y])) {
-                		break;
-            		}
-            		if(num[x][y]==1)
-            		{
-            			if(row==x&&column==y)
-            			{
-            				cout<<endl<<"\t\t\t The selected slot is already reserved. Please try again!";
-            				goto flow;
-						}
-					}
-        		}
-   			}	
-		}
-		read.close();
-		reserveWrite(row-1,column-1);
-	Vehicles writingObject,readingObject;
-	cout<<endl<<"\t\t\tEnter details: ";
-	again:
-	cout<<endl<<"\t\t\t\tPlate number: ";
-	cin>>writingObject.plateNo;
-	fstream dataFile;
-	dataFile.open("data.txt",ios::in|ios::binary);
-	if(!dataFile)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)));
-	{
-		if(readingObject.plateNo==writingObject.plateNo)
-		{
-			cout<<endl<<"\t\t\tThe vehicle with same plate no already exist. Please enter carefully!";
-			goto again;
-		}
-	}
-	dataFile.close();
-	cout<<endl<<"\t\t\t\tName: ";
-	cin.ignore();
-    cin.getline(writingObject.userName, 30);
-    cout<<endl<<"\t\t\t\tPresent time: ";
-    cout<<endl<<"\t\t\t\tHour: ";
-	cin>>writingObject.hr;
-	cout<<endl<<"\t\t\t\tMinute: ";
-	cin>>writingObject.min;
-	fstream data;
-	data.open("data.txt",ios::app|ios::binary);
-	if(!data)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	data.write((char *) & writingObject, sizeof(writingObject));
-	cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";
-	cout<<endl<<"\t\t\t\t\tThank You.";
-	cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
-	cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
-	cin>>ch;
-	tolower(ch);
-	if(ch=='y')
-	{
-		dataFile.close();
-		goto flow;
-	}
-	data.close();
-}
-
-void Vehicles::readVehicledata()
-{
-	Vehicles readingObject;
-	char ch=0;
-	string detailsCheck;
-	re:
-	cout<<endl<<"\t\t\t\tEnter number of vehile you want the details of: ";
-	cin>>detailsCheck;
-	fstream dataFile;
-	dataFile.open("data.txt",ios::in|ios::binary);
-	if(!dataFile)
-	{
-		cout<<endl<<"\t\t\tNo such file";
-	}
-	while(dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject)))
-	{
-		if(readingObject.plateNo==detailsCheck)
-		{
-			calculateTime(readingObject.hr,readingObject.min);
-			cout<<endl<<"\t\t\tPlate no: "<<readingObject.plateNo;
-			cout<<endl<<"\t\t\tUser name: "<<readingObject.userName;
-			cout<<endl<<endl<<"\t\t\tHappy Parking!";
-			cout<<endl<<"\t\tPlease enter any key to exit the page!";
-			cin>>ch;
-			if(ch!=0)
-			{
-				exit(0);
-			}
-			readingObject.removeData(detailsCheck);
-		}
-		else
-		{
-			cout<<endl<<"\t\t\t Error finding the details! Please enter valid number plate! ";
-			dataFile.close();
-			goto re;
-		}
-	}
-	dataFile.close();
-}
-
-void Vehicles::calculateTime(int x,int y)
-{
-	int h,m;
-	cout<<endl<<"\t\t\tEnter the present time: ";
-	cout<<endl<<"\t\t\tHours: ";
-	cin>>h;
-	cout<<endl<<"\t\t\tMinutes: ";
-	cin>>m;
-	int totalMin1=(x*60)+y;
-	int totalMin2=(h*60)+m;
-	int diff=totalMin2-totalMin1;
-	int hour=diff/60;
-	int min=diff%60;
-	float price=hour*50+min*0.8;
-	cout<<endl<<endl<<"\t\t\tTotal price: "<<abs(price);
-	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
-	cout<<endl<<"\t\t\tTotal minutes parked: "<<min;
-	cout<<endl<<endl<<"\t\t\tNote: Price per hour= Rs 50";
-}
-
-void Vehicles::removeData(string option) {
-    Vehicles temp;
-    int check = 0;
-    ofstream writing;
-    ifstream reading;
-    writing.open("delete.txt", ios::out | ios::binary);
-    reading.open("data.txt", ios::in | ios::binary);
-    if (!writing.is_open() || !reading.is_open()) {
-        cout << "Error: Unable to open files." << endl;
-        return;
-    }
-    while (reading.read(reinterpret_cast<char*>(&temp), sizeof(temp))) {
-        if (temp.plateNo == option) {
-            check = 1; 
-        } else {
-            writing.write(reinterpret_cast<char*>(&temp), sizeof(temp));
-        }
-    }
-    writing.close();
-    reading.close();
-    remove("data.txt");
-    rename("delete.txt", "data.txt");
-    if (check == 1) {
-        cout << "\n\t\t\tRecord Deleted Successfully.";
-    } else {
-        cout << "\n\t\t\tRecord not found!!";
-    }
-}
-
-
-void displayMenu()
-{
-	//object of vehicle class 
 	Vehicles selection;
 	int option;
 	char ch=0;
@@ -477,7 +318,7 @@ void displayMenu()
 				selection.setVehicledata();
 				displayMenu();
 			case 2:
-				selection.readVehicledata();
+				selection.generateData();
 				displayMenu();
 			case 3:
 				cout<<endl<<"\t\t\t\t\t\t\t\tDetails:"<<endl<<endl;
@@ -509,10 +350,138 @@ void displayMenu()
 		}
 }
 
+void Vehicles::setVehicledata()
+{
+	Vehicles writingObject;
+	int result;
+		system("cls");
+		cout<<endl<<endl<<endl<<"\t\t\t\t\t\t\t**********PARKING SLOTS**********"<<endl<<endl;
+		reserveRead();
+		
+	flow:	
+		cout<<endl<<endl<<"\t\t\tWhere do you want to park your vehicle?";
+		cout<<endl<<"\t\t\tEnter row and column(row<5 and column<8): ";
+		cin>>writingObject.row>>writingObject.column;
+		
+		result=checkReserved(row-1,column-1);
+		if(result==1)
+		{
+			goto flow;
+		}
+		
+		cout<<endl<<"\t\t\tEnter details: ";
+		again:
+			cout<<endl<<"\t\t\t\tPlate number: ";
+			cin>>writingObject.plateNo;
+			int check=checkPlateno(writingObject.plateNo);
+			if(check==1)
+			{
+				goto again;
+			}
+			cout<<endl<<"\t\t\t\tName: ";
+			cin.ignore();
+    		getline(cin,writingObject.userName );
+    		cout<<endl<<"\t\t\t\tPresent time: ";
+    		cout<<endl<<"\t\t\t\tHour: ";
+			cin>>writingObject.hr;
+			cout<<endl<<"\t\t\t\tMinute: ";
+			cin>>writingObject.min;
+		reserveWrite(row-1,column-1);
+		int hence=writeData(writingObject);
+		if(hence==1)
+		{
+			goto flow;
+		}
+}
+
+int Vehicles::checkReserved(int a,int b)
+{
+	bool exitLoop = false;
+	int flag;
+	ifstream read;
+	read.open("reserved.txt",ios::in);
+	while (!read.eof() && !exitLoop) {
+    	for (int x = 0; x < 5; x++) {
+        	for (int y = 0; y < 8; y++) {
+            	if (!(read >> num[x][y])) {
+                	exitLoop = true;
+                	break;
+            	}
+            	if (num[x][y] == 1) {
+                	if (a == x && b == y) {
+                    	flag = 1;
+                    	cout << endl << "\t\t\t The selected slot is already reserved. Please try again!";
+                    	sleep(2);
+                    	exitLoop = true; 
+                    	break;
+                	} 
+					else {
+                    	flag = 0;
+                	}
+            	}
+        	}
+        	if (exitLoop)
+			{
+				break; // Exit outer loop if flag is set
+			}	
+    	}
+	return flag;
+	read.close();
+	}
+}
+
+int Vehicles::checkPlateno(int temp1)
+{
+	ifstream dataFile;
+	Vehicles temp;
+	int flag=0;
+	dataFile.open("data.txt",ios::in);
+	if(!dataFile)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	while(dataFile.read(reinterpret_cast<char*>(&temp), sizeof(temp)));
+	{
+		if(temp.plateNo==temp1)
+		{
+			cout<<endl<<"\t\t\tThe vehicle with same plate no already exist. Please enter carefully!";
+			flag=1;
+			return flag;
+		}
+	}
+	dataFile.close();
+	return flag;
+}
+
+int Vehicles::writeData(Vehicles temp)
+{
+	char ch;
+	int flag=0;
+	ofstream data;
+	data.open("data.txt",ios::app);
+	if(!data)
+	{
+		cout<<endl<<"\t\t\tNo such file";
+	}
+	data.write((char *) &temp, sizeof(temp));
+	cout<<endl<<endl<<"\t\t\tYour vehicle has been parked successfully.";
+	cout<<endl<<"\t\t\t\t\tThank You.";
+	cout<<endl<<endl<<"\t\t\tDo you want to park another vehicle?";
+	cout<<endl<<"\t\t\tPress 'Y' to continue or 'N' to exit : ";
+	cin>>ch;
+	tolower(ch);
+	if(ch=='y')
+	{
+		flag=1;
+		data.close();
+	}
+	data.close();
+	return flag;
+}
+
 void reserveRead()
 {
-	fstream reservedFile;
-	int num[5][8];
+	ifstream reservedFile;
 	reservedFile.open("reserved.txt",ios::in);
 	while (!reservedFile.eof()) {
     	for (int x = 0; x < 5; x++) {
@@ -525,13 +494,14 @@ void reserveRead()
         cout << endl;
    		}	
 	}
+	reservedFile.close();
 }
 
 void reserveWrite(int num1, int num2) {
-    const int ROWS = 5;
-    const int COLS = 8;
-    int num[ROWS][COLS] = {};
-
+	int ROWS =5;
+	int COLS =8;
+	
+	//reading the reserved slots
     ifstream read("reserved.txt", ios::in);
     if (!read.is_open()) {
         cout << "Error: Failed to open file 'reserved.txt' for reading." << endl;
@@ -546,17 +516,13 @@ void reserveWrite(int num1, int num2) {
             }
         }
     }
-    read.close();
 
     if (num1 >= 0 && num1 < ROWS && num2 >= 0 && num2 < COLS) {
         num[num1][num2] = 1;
     }
-    else {
-        cout << endl << "\t\t\tError: Invalid array indices provided." << endl;
-        return;
-    }
-
-    ofstream reservedFile("reserved.txt");
+    
+	//writing the reserved slot with addition
+    ofstream reservedFile("reserved.txt",ios::out);
     if (!reservedFile.is_open()) {
         cout << endl << "\t\t\tError: Failed to open file 'reserved.txt' for writing." << endl;
         return;
@@ -568,7 +534,166 @@ void reserveWrite(int num1, int num2) {
         }
         reservedFile << endl;
     }
-
+    read.close();
     reservedFile.close();
-    cout << endl << "\t\t\tData written to file successfully." << endl;
+    
+}
+
+void Vehicles::generateData() {
+    Vehicles readingObject;
+    int detailsCheck,found=0;
+    cout << endl << "\t\t\t\tEnter number of vehicle you want the details of: ";
+    cin >> detailsCheck;
+
+	//reading the data of vehicles
+    ifstream dataFile;
+	dataFile.open("data.txt",ios::in);
+    if (!dataFile) {
+        cout << endl << "\t\t\tNo such file";
+        exit(0);
+    }
+    while (dataFile.read(reinterpret_cast<char*>(&readingObject), sizeof(readingObject))) 
+	{
+        if (readingObject.plateNo = detailsCheck) 
+		{
+            cout << endl << "\t\t\tPlate no: " << readingObject.plateNo;
+            cout << endl << "\t\t\tUser name: " << readingObject.userName;
+            removeSlot(detailsCheck);
+            calculateTime(readingObject.hr, readingObject.min);
+            cout << endl << endl << "\t\t\tHappy Parking!";
+            found=1;
+            break;
+        }
+        else
+        {
+        	found=0;
+		}
+    }
+    dataFile.close();
+
+	if(found==0)
+	{
+		cout<<endl<<"\t\t\t\tNo record found!";
+	}
+    
+    removeData(detailsCheck);
+}
+
+void Vehicles::calculateTime(int x,int y)
+{
+	int h,m;
+	cout<<endl<<"\t\t\tEnter the present time: ";
+	cout<<endl<<"\t\t\tHours: ";
+	cin>>h;
+	cout<<endl<<"\t\t\tMinutes: ";
+	cin>>m;
+	int totalMin1=(x*60)+y;
+	int totalMin2=(h*60)+m;
+	int diff=totalMin2-totalMin1;
+	int hour=diff/60;
+	int min=diff%60;
+	float price=hour*50+min*0.8;
+	cout<<endl<<endl<<"\t\t\tTotal price: "<<abs(price);
+	cout<<endl<<"\t\t\tTotal hour parked: "<<hour;
+	cout<<endl<<"\t\t\tTotal minutes parked: "<<min;
+	cout<<endl<<endl<<"\t\t\tNote: Price per hour= Rs 50";
+}
+
+void Vehicles::removeData(int option) {
+	Vehicles temp;
+    int check = 0;
+    ofstream writing;
+	writing.open("delete.txt", ios::out);
+    ifstream reading;
+	reading.open("data.txt", ios::in);
+
+    if (!writing || !reading) {
+        cout << "Error: Unable to open files." << endl;
+        exit(0);
+    }
+	reading.seekg(0, ios::beg);
+    while (reading.read(reinterpret_cast<char*>(&temp), sizeof(temp))) {
+        if (temp.plateNo==option) {
+            check = 1;
+        } else {
+            writing.write(reinterpret_cast<char*>(&temp), sizeof(temp));
+        }
+    }
+
+    writing.close();
+    reading.close();
+    remove("data.txt");
+    rename("delete.txt", "data.txt");
+
+    if (check == 1) {
+        cout << "\n\t\t\tRecord Deleted Successfully.";
+    } 
+	else {
+        cout << "\n\t\t\tRecord not found!!";
+    }
+    sleep(3);
+}
+
+void Vehicles::removeSlot(int details)
+{
+	Vehicles tempo;
+	int a,b;
+	ifstream rData;
+	rData.open("data.txt",ios::in);
+	if (!rData) {
+        cout << endl << "\t\t\tNo such file";
+        exit(0);
+    }
+    while (rData.read(reinterpret_cast<char*>(&tempo), sizeof(tempo))) 
+	{
+        if (tempo.plateNo= details) 
+		{
+            a=tempo.row;
+            b=tempo.column;
+            break;
+        }
+	}
+	
+	cout<<endl<<endl<<"\t\t\tThe vehicle is parked in row: "<<a <<" and column: "<<b;
+	ifstream temp1;
+	ofstream temp2;
+	
+	temp1.open("reserved.txt",ios::in);
+	if (!temp1.is_open()) {
+        cout << "\t\t\tError: Failed to open file 'reserved.txt' for reading." << endl;
+        exit(1);
+    }
+    else {
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 8; y++) {
+                if (!(temp1 >> num[x][y])) {
+                    break;
+                }
+            }
+        }
+    }
+    for (int x = 0; x < 5; x++) 
+	{
+        for (int y = 0; y < 8; y++) 
+		{
+            if(a==x&&b==y)
+            {
+                num[a][b]=0;
+			}
+        }
+    }
+    
+    temp2.open("temp.txt",ios::out);
+    for (int k = 0; k < 5; k++) {
+        for (int l = 0; l < 8; l++) {
+            temp2 << num[k][l] << " ";
+        }
+        temp2<< endl;
+    }
+    
+    temp2.close();
+    temp1.close();
+    rData.close();
+    remove("reserved.txt");
+    rename("temp.txt", "reserved.txt");
 }
